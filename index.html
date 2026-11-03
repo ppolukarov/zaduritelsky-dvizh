@@ -1,0 +1,14 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Проверка GitHub Pages</title><style>body{background:#10151e;color:#eef3fa;font:18px/1.6 system-ui;margin:24px;max-width:650px}button{background:#bbf75e;color:#18210e;border:0;border-radius:8px;padding:14px;font:inherit}#status{overflow-wrap:anywhere}</style><h1>Проверка GitHub Pages</h1><p>Страница открылась. Отключи VPN и нажми кнопку: проверится загрузка файла около 200 КБ с этого же сайта.</p><button>Проверить загрузку</button><p id="status" role="status">Проверка ещё не запущена.</p><noscript>Для проверки нужен JavaScript.</noscript><script>const button=document.querySelector('button');
+button.addEventListener('click',async()=>{
+  button.disabled=true;const status=document.querySelector('#status');
+  status.textContent='Загрузка файла проверки…';
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),15000);
+  try {
+    const response=await fetch('./probe.js',{cache:'no-store',signal:controller.signal});
+    if(!response.ok)throw Error('HTTP '+response.status);
+    const body=await response.text();
+    if(!body.endsWith('// END') || body.length<200000)throw Error('Файл получен не полностью');
+    status.textContent='ОК: страница и файл проверки полностью загружаются.';
+  } catch(error) {status.textContent=controller.signal.aborted?'Нет ответа за 15 секунд.':error.message;}
+  finally {clearTimeout(timer);button.disabled=false;}
+});</script></html>
